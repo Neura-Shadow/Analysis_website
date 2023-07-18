@@ -123,3 +123,98 @@ From SQLserver..CovidDeaths
 Where continent is not null 
 order by 1,2
 
+-----------------------------------------------------------------------
+
+--Partition Data Address
+
+Select *
+From SQLserver..NashvilleHousing
+order by ParcelID
+
+
+
+Select a.ParcelID, a.PropertyAddress, b.ParcelID, b.PropertyAddress, ISNULL(a.PropertyAddress,b.PropertyAddress)
+From SQLserver.dbo.NashvilleHousing a
+JOIN SQLserver.dbo.NashvilleHousing b
+	on a.ParcelID = b.ParcelID
+	AND a.[UniqueID ] <> b.[UniqueID ]
+Where a.PropertyAddress is null
+
+
+Update a
+SET PropertyAddress = ISNULL(a.PropertyAddress,b.PropertyAddress)
+From SQLserver.dbo.NashvilleHousing a
+JOIN SQLserver.dbo.NashvilleHousing b
+	on a.ParcelID = b.ParcelID
+	AND a.[UniqueID ] <> b.[UniqueID ]
+Where a.PropertyAddress is null
+
+
+
+-- Breaking out Address into Individual Columns
+
+
+Select PropertyAddress
+From SQLserver.dbo.NashvilleHousing
+--Where PropertyAddress is null
+--order by ParcelID
+
+SELECT
+SUBSTRING(PropertyAddress, 1, CHARINDEX(',', PropertyAddress) -1 ) as Address
+, SUBSTRING(PropertyAddress, CHARINDEX(',', PropertyAddress) + 1 , LEN(PropertyAddress)) as Address
+From SQLserver.dbo.NashvilleHousing
+
+
+ALTER TABLE NashvilleHousing
+Add PropertySplitAddress Nvarchar(255);
+Update NashvilleHousing
+SET PropertySplitAddress = SUBSTRING(PropertyAddress, 1, CHARINDEX(',', PropertyAddress) -1 )
+
+
+ALTER TABLE NashvilleHousing
+Add PropertySplitCity Nvarchar(255);
+Update NashvilleHousing
+SET PropertySplitCity = SUBSTRING(PropertyAddress, CHARINDEX(',', PropertyAddress) + 1 , LEN(PropertyAddress))
+
+
+Select *
+From SQLserver.dbo.NashvilleHousing
+
+
+
+
+
+Select OwnerAddress
+From SQLserever.dbo.NashvilleHousing
+
+
+Select
+PARSENAME(REPLACE(OwnerAddress, ',', '.') , 3)
+,PARSENAME(REPLACE(OwnerAddress, ',', '.') , 2)
+,PARSENAME(REPLACE(OwnerAddress, ',', '.') , 1)
+From SQLserver.dbo.NashvilleHousing
+
+
+
+ALTER TABLE NashvilleHousing
+Add OwnerSplitAddress Nvarchar(255);
+Update NashvilleHousing
+SET OwnerSplitAddress = PARSENAME(REPLACE(OwnerAddress, ',', '.') , 3)
+
+
+ALTER TABLE NashvilleHousing
+Add OwnerSplitCity Nvarchar(255);
+Update NashvilleHousing
+SET OwnerSplitCity = PARSENAME(REPLACE(OwnerAddress, ',', '.') , 2)
+
+
+
+ALTER TABLE NashvilleHousing
+Add OwnerSplitState Nvarchar(255);
+Update NashvilleHousing
+SET OwnerSplitState = PARSENAME(REPLACE(OwnerAddress, ',', '.') , 1)
+
+
+
+Select *
+From SQLserver.dbo.NashvilleHousing
